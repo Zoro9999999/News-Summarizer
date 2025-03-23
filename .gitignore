@@ -1,0 +1,12 @@
+# Virtual environment
+venv/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Generated audio files
+*.mp3
+
+# Other temporary files
+*.log
