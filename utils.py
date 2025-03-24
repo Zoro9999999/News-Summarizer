@@ -1,3 +1,12 @@
+import nltk
+import os
+
+nltk_data_path = os.path.join(os.path.expanduser("~"), "nltk_data")
+if not os.path.exists(os.path.join(nltk_data_path, "tokenizers", "punkt")):
+    nltk.download('punkt', quiet=True)
+if not os.path.exists(os.path.join(nltk_data_path, "tokenizers", "punkt_tab")):
+    nltk.download('punkt_tab', quiet=True)
+
 import requests
 from bs4 import BeautifulSoup
 from googlesearch import search
@@ -17,14 +26,12 @@ def scrape_articles(company_name):
     search_query = f'"{company_name}" "news" "about {company_name}" site:*.edu | site:*.org | site:*.gov -inurl:(signup | login)'
     
     try:
-        # Reduced num_results from 50 to 20 to speed up the search
         search_results = search(search_query, num_results=20)
         for url in search_results:
             if len(articles) >= 10:
                 break
             try:
-                # Reduced delay from 5 seconds to 1 second
-                time.sleep(1)
+                time.sleep(2)
                 response = requests.get(url, headers=headers, timeout=10)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.text, 'html.parser')
@@ -35,13 +42,12 @@ def scrape_articles(company_name):
                 if not raw_content:
                     continue
                 
-                # Relevance check: Ensure the company name appears in the title or frequently in the content
+                
                 company_name_lower = company_name.lower()
                 title_lower = title.lower()
                 content_lower = raw_content.lower()
                 company_mention_count = content_lower.count(company_name_lower)
                 
-                # Require the company name in the title OR at least 3 mentions in the content
                 if not (company_name_lower in title_lower or company_mention_count >= 3):
                     print(f"Skipping article '{title}' - not relevant to {company_name} (mentions: {company_mention_count})")
                     continue
@@ -78,34 +84,28 @@ def summarize_text_500_words(text):
     return ' '.join(summary_text.split()[:500])
 
 def text_to_speech_hindi(text):
-    # Translate English text to Hindi
     try:
         translated_text = GoogleTranslator(source='en', target='hi').translate(text)
     except Exception as e:
         print(f"Translation error: {str(e)}")
-        translated_text = text  # Fallback to original text if translation fails
+        translated_text = text  
     
-    # Generate audio in Hindi
     tts = gTTS(text=translated_text, lang='hi', slow=False)
     audio_file = "summary.mp3"
     tts.save(audio_file)
     return audio_file
 
 def text_to_speech_hindi_limited(text, index):
-    # Limit to ~3-4 minutes (180-240 seconds)
-    # gTTS normal speed is ~200 words/minute, so ~600-800 words for 3-4 mins
     words = text.split()
-    target_words = min(len(words), 700)  # Aim for ~3.5 minutes (700 words)
+    target_words = min(len(words), 700) 
     limited_text = " ".join(words[:target_words])
     
-    # Translate English text to Hindi
     try:
         translated_text = GoogleTranslator(source='en', target='hi').translate(limited_text)
     except Exception as e:
         print(f"Translation error: {str(e)}")
-        translated_text = limited_text  # Fallback to original text if translation fails
-    
-    # Generate audio in Hindi
+        translated_text = limited_text  
+   
     tts = gTTS(text=translated_text, lang='hi', slow=False)
     audio_file = f"summary_{index}.mp3"
     tts.save(audio_file)

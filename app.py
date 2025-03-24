@@ -35,7 +35,6 @@ def main():
     st.title("News Summarization and Sentiment Analyzer")
     st.write("Enter a company name to analyze news articles.")
     
-    # Changed: Remove default value to make the input blank
     company_name = st.text_input("Company Name", "")
     
     if st.button("Analyze News"):
@@ -65,19 +64,15 @@ def main():
                     sentiment, score = analyze_sentiment(content or "No content available")
                     summary_500 = summarize_text_500_words(content or "No content available")
                     
-                    # Article Header
                     st.header(f"Article {i}: {article.get('title', 'Untitled')}")
                     
-                    # Dropdown for URL and Full Content
                     with st.expander("View URL and Full Content"):
                         st.write(f"**URL**: {article.get('url', 'No URL')}")
                         st.write(f"**Full Content**: {article.get('raw_content', content)}")
                     
-                    # Summary Section (Not in Dropdown)
                     st.subheader("Summary (500 words)")
                     st.text_area(f"Summary of Article {i}", summary_500, height=300, key=f"summary_{i}")
                     
-                    # Sentiment Analysis with Emoji Slider
                     st.subheader("Sentiment Analysis")
                     st.write(f"Sentiment: {sentiment} ({score:.2f})")
                     sentiment_value = {"Positive": 100, "Neutral": 50, "Negative": 0}.get(sentiment, 50)
@@ -90,25 +85,20 @@ def main():
                         disabled=True,
                         key=f"sentiment_{i}"
                     )
-                    
-                    # Hindi Audio for Summary (3-4 minutes)
                     st.subheader("Hindi Audio Summary")
                     audio_file = text_to_speech_hindi_limited(summary_500, i)
                     st.audio(audio_file, format="audio/mp3")
                     
                     processed_articles.append({"Sentiment": sentiment})
                     
-                    # Add a divider between articles
                     st.markdown("---")
                 except Exception as e:
                     st.warning(f"Error processing article {i}: {str(e)}")
                     continue
             
-            # Comparative Analysis
             st.header("Comparative Analysis of All Articles")
             overall_sentiment, overall_score, hindi_summary = comparative_analysis(processed_articles)
             
-            # Display Overall Sentiment
             st.write(f"Overall Sentiment: {overall_sentiment}")
             st.slider(
                 "Overall Sentiment Across Articles",
@@ -120,7 +110,6 @@ def main():
                 key="overall_sentiment"
             )
             
-            # Hindi Audio for Comparative Analysis
             st.subheader("Comparative Sentiment Audio (Hindi)")
             comparative_audio_file = text_to_speech_hindi(hindi_summary)
             st.audio(comparative_audio_file, format="audio/mp3")
