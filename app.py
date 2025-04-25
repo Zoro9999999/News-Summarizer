@@ -1,5 +1,5 @@
 import streamlit as st
-from utils import summarize_text_500_words, text_to_speech_hindi, text_to_speech_hindi_limited
+from utils import summarize_text, text_to_speech_hindi, text_to_speech_hindi_limited
 from model import analyze_sentiment
 from api import get_articles_api
 
@@ -19,7 +19,6 @@ def comparative_analysis(articles):
     if total == 0:
         return "Neutral", 0.0, "No articles to analyze."
     
-    # Calculate weighted sentiment score (0-100)
     score = (sentiment_dist["Positive"] * 100 + sentiment_dist["Neutral"] * 50) / total
     if sentiment_dist["Positive"] > sentiment_dist["Negative"] and sentiment_dist["Positive"] >= sentiment_dist["Neutral"]:
         overall_sentiment = "Positive"
@@ -62,7 +61,7 @@ def main():
                 try:
                     content = article.get('processed_content', article.get('content', ''))
                     sentiment, score = analyze_sentiment(content or "No content available")
-                    summary_500 = summarize_text_500_words(content or "No content available")
+                    summary = summarize_text(content or "No content available")
                     
                     st.header(f"Article {i}: {article.get('title', 'Untitled')}")
                     
@@ -70,8 +69,8 @@ def main():
                         st.write(f"**URL**: {article.get('url', 'No URL')}")
                         st.write(f"**Full Content**: {article.get('raw_content', content)}")
                     
-                    st.subheader("Summary (500 words)")
-                    st.text_area(f"Summary of Article {i}", summary_500, height=300, key=f"summary_{i}")
+                    st.subheader("Summary (4-5 sentences)")
+                    st.text_area(f"Summary of Article {i}", summary, height=150, key=f"summary_{i}")
                     
                     st.subheader("Sentiment Analysis")
                     st.write(f"Sentiment: {sentiment} ({score:.2f})")
@@ -86,7 +85,7 @@ def main():
                         key=f"sentiment_{i}"
                     )
                     st.subheader("Hindi Audio Summary")
-                    audio_file = text_to_speech_hindi_limited(summary_500, i)
+                    audio_file = text_to_speech_hindi_limited(summary, i)
                     st.audio(audio_file, format="audio/mp3")
                     
                     processed_articles.append({"Sentiment": sentiment})
